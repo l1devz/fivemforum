@@ -1,0 +1,26 @@
+<%- include('partials/head') %>
+
+<div class="pagehead"><h1>Arama</h1></div>
+<form class="block searchbar" method="get">
+  <%- include('partials/icon', { name: 'search', size: 18 }) %>
+  <input name="q" value="<%= q %>" placeholder="En az 2 karakter…" autofocus>
+  <button class="btn">Ara</button>
+</form>
+
+<% if (q) { %>
+<section class="block feed">
+  <% if (!results.length) { %><p class="empty">“<%= q %>” için sonuç bulunamadı.</p><% } %>
+  <% results.forEach(function (r) { %>
+  <div class="feed-item">
+    <div class="feed-ic"><%- include('partials/icon', { name: 'chat', size: 16 }) %></div>
+    <div class="feed-main">
+      <p><a href="/post/<%= r.id %>"><%= r.title %></a></p>
+      <p class="feed-snip"><%= r.body.replace(/\[[^\]]+\]/g, '').slice(0, 220) %></p>
+      <span class="meta"><%= r.username %> · <%= timeAgo(r.created_at) %></span>
+    </div>
+  </div>
+  <% }) %>
+</section>
+<% } %>
+
+<%- include('partials/foot') %>

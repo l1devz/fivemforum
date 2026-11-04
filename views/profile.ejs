@@ -1,0 +1,72 @@
+<%- include('partials/head') %>
+
+<section class="profile block">
+  <div class="profile-banner"<% if (member.banner_url) { %> style="background-image:url('<%= member.banner_url %>')"<% } else { %> style="--h:<%= hue(member.username) %>"<% } %>></div>
+  <div class="profile-top">
+    <div class="profile-av"><%- include('partials/avatar', { au: member, sz: 148 }) %></div>
+    <div class="profile-id">
+      <% const isOnline = member.last_seen && Date.now() - member.last_seen < 15 * 60e3; %>
+      <div class="profile-nameline">
+        <h1 class="profile-name<%= member.name_color ? ' colored' : '' %>"<% if (member.name_color) { %> style="--nc:<%= member.name_color %>"<% } %>><%= member.username %></h1>
+        <% if (isOnline) { %><span class="online-pill"><span class="online-dot"></span>Çevrim içi</span><% } %>
+      </div>
+      <% if (member.title) { %><p class="utitle profile-title"><%= member.title %></p><% } %>
+      <div class="profile-badges">
+
+        <%- include('partials/role', { r: member.role }) %>
+        <% if (member.is_banned) { %><span class="role role-banned">Yasaklı</span><% } %>
+      </div>
+      <p class="profile-meta">
+        <% if (member.location) { %><span><%= member.location %></span><% } %>
+        <span>Katılım <b><%= memberFor(member.created_at) %></b></span>
+        <span>Son görülme <b><%= timeAgo(member.last_seen) %></b></span>
+      </p>
+    </div>
+    <div class="profile-actions">
+      <% if (user && user.id !== member.id && !member.is_banned) { %><a class="btn sm" href="/conversations/new?to=<%= encodeURIComponent(member.username) %>"><%- include('partials/icon', { name: 'mail', size: 14 }) %> Mesaj gönder</a><% } %>
+      <% if (user && user.id === member.id) { %><a class="btn ghost sm" href="/account"><%- include('partials/icon', { name: 'edit', size: 14 }) %> Profili düzenle</a><% } %>
+      <% if (isAdmin) { %><a class="btn ghost sm" href="/admin/users/<%= member.id %>"><%- include('partials/icon', { name: 'shield', size: 14 }) %> Yönet</a><% } %>
+    </div>
+  </div>
+  <dl class="profile-stats">
+    <div><dt>Mesajlar</dt><dd><%= stats.posts.toLocaleString('tr-TR') %></dd></div>
+    <div><dt>Konular</dt><dd><%= stats.threads.toLocaleString('tr-TR') %></dd></div>
+    <div><dt>Tepki puanı</dt><dd><%= stats.score.toLocaleString('tr-TR') %></dd></div>
+  </dl>
+  <nav class="tabs">
+    <a href="/member/<%= member.id %>" class="<%= tab === 'activity' ? 'on' : '' %>">Son aktivite</a>
+    <a href="/member/<%= member.id %>?tab=posts" class="<%= tab === 'posts' ? 'on' : '' %>">Gönderiler</a>
+    <a href="/member/<%= member.id %>?tab=about" class="<%= tab === 'about' ? 'on' : '' %>">Hakkında</a>
+  </nav>
+</section>
+
+<section class="block feed">
+  <% if (tab === 'about') { %>
+    <div class="about">
+      <% if (member.about) { %><div class="bb"><%- renderBody(member.about) %></div><% } else { %><p class="empty">Kullanıcı henüz kendisi hakkında bir şey yazmamış.</p><% } %>
+      <dl class="kv">
+        <div><dt>Kayıt tarihi</dt><dd><%= fullDate(member.created_at) %></dd></div>
+        <div><dt>Rol</dt><dd><%= ROLES[member.role].label %></dd></div>
+      </dl>
+    </div>
+  <% } else if (!items.length) { %>
+    <p class="empty">Şu an hiç beslemesi bulunmamaktadır.</p>
+  <% } else { %>
+    <% items.forEach(function (it) { %>
+    <div class="feed-item">
+      <div class="feed-ic"><%- include('partials/icon', { name: it.is_first ? 'file' : 'reply', size: 16 }) %></div>
+      <div class="feed-main">
+        <p>
+          <% if (tab === 'activity') { %><%= member.username %> <%= it.is_first ? 'yeni bir konu açtı:' : 'konuya cevap yazdı:' %> <% } %>
+          <a href="/post/<%= it.id %>"><%= it.title %></a>
+          <% if (it.forum) { %><span class="meta"> · <%= it.forum %></span><% } %>
+        </p>
+        <p class="feed-snip"><%= it.body.replace(/\[[^\]]+\]/g, '').slice(0, 220) %></p>
+        <span class="meta"><%= timeAgo(it.created_at) %></span>
+      </div>
+    </div>
+    <% }) %>
+  <% } %>
+</section>
+
+<%- include('partials/foot') %>

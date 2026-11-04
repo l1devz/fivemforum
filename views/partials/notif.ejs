@@ -1,0 +1,28 @@
+<%
+const _ic = { reply: 'reply', quote: 'quote', mention: 'at', reaction: 'heart', role: 'shield' }[n.type] || 'bell';
+const _actor = n.actor_name || 'Sistem';
+%><a class="notif<%= n.is_read ? '' : ' unread' %> notif-<%= n.type %>" href="/notifications/<%= n.id %>">
+  <span class="notif-av">
+    <%- include('avatar', { au: { username: _actor, avatar_url: n.avatar_url }, sz: 36 }) %>
+    <span class="notif-type"><%- include('icon', { name: _ic, size: 11 }) %></span>
+  </span>
+  <span class="notif-txt">
+    <span>
+      <b<% if (n.name_color) { %> style="color:<%= n.name_color %>"<% } %>><%= _actor %></b>
+      <% if (n.type === 'reply') { %>
+        takip ettiğin konuya <%= n.count > 1 ? n.count + ' yeni cevap' : 'cevap' %> yazdı:
+      <% } else if (n.type === 'quote') { %>
+        mesajını alıntıladı:
+      <% } else if (n.type === 'mention') { %>
+        bir mesajda senden bahsetti:
+      <% } else if (n.type === 'reaction') { %>
+        mesajını beğendi:
+      <% } else if (n.type === 'role') { %>
+        rolünü <b><%= n.extra %></b> olarak değiştirdi.
+      <% } %>
+      <% if (n.thread_title) { %><b class="notif-thread"><%= n.thread_title %></b><% } %>
+    </span>
+    <span class="meta"><%= timeAgo(n.created_at) %></span>
+  </span>
+  <% if (!n.is_read) { %><span class="notif-dot" aria-label="Okunmadı"></span><% } %>
+</a>

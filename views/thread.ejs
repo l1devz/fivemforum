@@ -1,0 +1,177 @@
+<%- include('partials/head') %>
+
+<nav class="crumbs">
+  <a href="/">Forumlar</a><%- include('partials/icon', { name: 'chevron', size: 14 }) %>
+  <span><%= thread.category %></span><%- include('partials/icon', { name: 'chevron', size: 14 }) %>
+  <a href="/forum/<%= thread.forum_id %>"><%= thread.forum_title %></a>
+</nav>
+
+<div class="pagehead">
+  <div>
+    <h1 class="thread-title">
+      <% if (thread.is_pinned) { %><span class="flag flag-pin"><%- include('partials/icon', { name: 'pin', size: 12 }) %>Sabit</span><% } %>
+      <% if (thread.is_locked) { %><span class="flag flag-lock"><%- include('partials/icon', { name: 'lock', size: 12 }) %>Kilitli</span><% } %>
+      <%- include('partials/prefix', { pl: thread.prefix_label, pc: thread.prefix_color }) %>
+      <%= thread.title %>
+    </h1>
+    <p class="meta"><%- include('partials/icon', { name: 'clock', size: 14 }) %> <%= fullDate(thread.created_at) %> &nbsp; <%- include('partials/icon', { name: 'eye', size: 14 }) %> <%= thread.views.toLocaleString('tr-TR') %> görüntülenme</p>
+  </div>
+  <div class="pagehead-actions">
+  <% if (canPrefix) { %>
+  <form method="post" action="/thread/<%= thread.id %>/prefix" class="prefix-form">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <select name="prefix_id" aria-label="Konu öneki" onchange="this.form.requestSubmit()">
+      <option value="">Önek yok</option>
+      <% prefixes.forEach(function (p) { %><option value="<%= p.id %>" <%= p.id === thread.prefix_id ? 'selected' : '' %>><%= p.label %></option><% }) %>
+    </select>
+    <noscript><button class="btn sm ghost">Değiştir</button></noscript>
+  </form>
+  <% } %>
+  <% if (isStaff) { %>
+  <details class="menu modmenu">
+    <summary class="btn ghost"><%- include('partials/icon', { name: 'shield', size: 16 }) %> Moderasyon</summary>
+    <div class="menu-pop wide">
+      <form method="post" action="/thread/<%= thread.id %>/mod" class="row-form">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <button name="action" value="pin"><%- include('partials/icon', { name: 'pin', size: 16 }) %> <%= thread.is_pinned ? 'Sabiti kaldır' : 'Sabitle' %></button>
+        <button name="action" value="lock"><%- include('partials/icon', { name: 'lock', size: 16 }) %> <%= thread.is_locked ? 'Kilidi aç' : 'Kilitle' %></button>
+      </form>
+      <form method="post" action="/thread/<%= thread.id %>/mod">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <button name="action" value="feature"><%- include('partials/icon', { name: 'megaphone', size: 16 }) %> <%= thread.is_featured ? 'Ana sayfadan kaldır' : 'Ana sayfada öne çıkar' %></button>
+      </form>
+      <form method="post" action="/thread/<%= thread.id %>/mod" class="stack-form">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <input type="hidden" name="action" value="rename">
+        <label>Başlığı değiştir<input name="new_title" value="<%= thread.title %>"></label>
+        <button class="btn sm">Kaydet</button>
+      </form>
+      <form method="post" action="/thread/<%= thread.id %>/mod" class="stack-form">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <input type="hidden" name="action" value="move">
+        <label>Taşı
+          <select name="forum_id"><% forums.forEach(function (f) { %><option value="<%= f.id %>" <%= f.id === thread.forum_id ? 'selected' : '' %>><%= f.title %></option><% }) %></select>
+        </label>
+        <button class="btn sm">Taşı</button>
+      </form>
+      <form method="post" action="/thread/<%= thread.id %>/mod" data-confirm="Konu ve tüm mesajları silinecek. Emin misin?">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <button name="action" value="delete" class="danger"><%- include('partials/icon', { name: 'trash', size: 16 }) %> Konuyu sil</button>
+      </form>
+    </div>
+  </details>
+  <% } %>
+  </div>
+</div>
+
+<%- include('partials/pager', { base: '/thread/' + thread.id }) %>
+
+<div class="posts">
+<% posts.forEach(function (p, i) { %>
+  <article class="post" id="post-<%= p.id %>">
+    <aside class="post-user">
+      <%- include('partials/avatar', { au: p, sz: 84 }) %>
+      <%- include('partials/uname', { nid: p.uid, nname: p.username, ncolor: p.name_color }) %>
+      <% if (p.utitle) { %><span class="utitle"><%= p.utitle %></span><% } %>
+      <%- include('partials/role', { r: p.role }) %>
+      <dl class="post-user-kv">
+        <div><dt>Katılım</dt><dd><%= new Date(p.joined).toLocaleDateString('tr-TR', { month: 'short', year: 'numeric' }) %></dd></div>
+        <div><dt>Mesaj</dt><dd><%= p.user_posts %></dd></div>
+        <div><dt>Tepki</dt><dd><%= p.user_score %></dd></div>
+      </dl>
+    </aside>
+    <div class="post-body">
+      <header class="post-head">
+        <a href="/post/<%= p.id %>" class="meta"><%= timeAgo(p.created_at) %></a>
+        <a href="/post/<%= p.id %>" class="post-no">#<%= offset + i + 1 %></a>
+      </header>
+      <div class="bb"><%- renderBody(p.body) %></div>
+      <% if (p.edited_at) { %><p class="edited">Son düzenleme: <%= timeAgo(p.edited_at) %></p><% } %>
+      <footer class="post-foot">
+        <div class="post-actions">
+          <% if (user && (user.id === p.uid || isStaff)) { %>
+            <a href="/post/<%= p.id %>/edit"><%- include('partials/icon', { name: 'edit', size: 15 }) %> Düzenle</a>
+            <% if (p.id !== firstPostId) { %>
+            <form method="post" action="/post/<%= p.id %>/delete" data-confirm="Bu mesaj silinsin mi?">
+              <input type="hidden" name="_csrf" value="<%= csrf %>"><button><%- include('partials/icon', { name: 'trash', size: 15 }) %> Sil</button>
+            </form>
+            <% } %>
+          <% } %>
+          <% if (canReply && !(thread.is_locked && !isStaff)) { %>
+            <button type="button" class="js-quote" data-user="<%= p.username %>" data-body="<%= p.body %>"><%- include('partials/icon', { name: 'reply', size: 15 }) %> Alıntıla</button>
+          <% } %>
+        </div>
+        <% if (user && user.id !== p.uid) { %>
+          <form method="post" action="/post/<%= p.id %>/react">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <button class="like<%= p.liked ? ' on' : '' %>"><%- include('partials/icon', { name: 'heart', size: 15 }) %> <span><%= p.likes %></span></button>
+          </form>
+        <% } else { %>
+          <span class="like static"><%- include('partials/icon', { name: 'heart', size: 15 }) %> <span><%= p.likes %></span></span>
+        <% } %>
+      </footer>
+    </div>
+  </article>
+<% }) %>
+</div>
+
+<%- include('partials/pager', { base: '/thread/' + thread.id }) %>
+
+<% if (thread.reply_level !== 'member' && !canReply) { %>
+  <div class="block cta restricted"><%- include('partials/icon', { name: 'shield', size: 16 }) %> Bu bölümde yalnızca <%= replyWho %> mesaj yazabilir.</div>
+<% } else if (!user) { %>
+  <section class="block guestbox">
+    <h2>Cevap yazmak için giriş yap ya da üye ol</h2>
+    <p>Konulara cevap vermek, beğenmek ve kendi konunu açmak için bir hesaba ihtiyacın var.</p>
+    <div class="guestbox-cards">
+      <div class="guestbox-card">
+        <%- include('partials/icon', { name: 'userplus', size: 120 }).replace('class="ic"', 'class="ic bg"') %>
+        <strong>Kayıt ol</strong>
+        <p>Forumda hesap oluşturmak ücretsiz ve saniyeler sürer.</p>
+        <a class="btn" href="/register">Şimdi kayıt ol</a>
+      </div>
+      <div class="guestbox-card">
+        <%- include('partials/icon', { name: 'logout', size: 120 }).replace('class="ic"', 'class="ic bg"') %>
+        <strong>Giriş yap</strong>
+        <p>Zaten bir hesabın varsa giriş yaparak devam et.</p>
+        <a class="btn ghost" href="/login?next=/thread/<%= thread.id %>">Giriş yap</a>
+      </div>
+    </div>
+  </section>
+<% } else if (thread.is_locked && !isStaff) { %>
+  <div class="block cta"><%- include('partials/icon', { name: 'lock', size: 16 }) %> Bu konu kilitlendi, yeni cevap yazılamaz.</div>
+<% } else { %>
+  <form class="block reply" method="post" action="/thread/<%= thread.id %>/reply" id="reply">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <div class="reply-who"><%- include('partials/avatar', { au: user, sz: 40 }) %></div>
+    <div class="reply-main">
+      <%- include('partials/editor', { rows: 6 }) %>
+      <div class="form-actions"><button class="btn"><%- include('partials/icon', { name: 'reply', size: 16 }) %> Cevap gönder</button></div>
+    </div>
+  </form>
+<% } %>
+
+<% if (similar.length) { %>
+<section class="block similar">
+  <header class="cat-head"><h2>Benzer konular</h2></header>
+  <% similar.forEach(function (s) { %>
+  <div class="simrow">
+    <%- include('partials/avatar', { au: s, sz: 36 }) %>
+    <div class="simrow-main">
+      <div class="simrow-title">
+        <%- include('partials/prefix', { pl: s.prefix_label, pc: s.prefix_color }) %>
+        <a href="/thread/<%= s.id %>" title="<%= s.title %>"><%= s.title %></a>
+      </div>
+      <span class="meta"><%- include('partials/uname', { nid: s.uid, nname: s.username, ncolor: s.name_color }) %> · <%= timeAgo(s.created_at) %> · <a href="/forum/<%= s.forum_id %>"><%= s.forum_title %></a></span>
+    </div>
+    <div class="simrow-kv"><span>Cevaplar:</span><b><%= short(s.replies) %></b><span>Görüntülenme:</span><b><%= short(s.views) %></b></div>
+    <div class="simrow-last">
+      <div><span><%= timeAgo(s.last_post_at) %></span><a href="/member/<%= s.luid %>" class="meta"<% if (s.lcolor) { %> style="color:<%= s.lcolor %>"<% } %>><%= s.lusername %></a></div>
+      <%- include('partials/avatar', { au: { username: s.lusername || s.username, avatar_url: s.lavatar }, sz: 28 }) %>
+    </div>
+  </div>
+  <% }) %>
+</section>
+<% } %>
+
+<%- include('partials/foot') %>

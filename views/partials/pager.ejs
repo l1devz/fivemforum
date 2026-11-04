@@ -1,0 +1,7 @@
+<% if (pages > 1) { %>
+<nav class="pager">
+  <% for (let i = 1; i <= pages; i++) { if (i === 1 || i === pages || Math.abs(i - page) <= 2) { %>
+    <a href="<%= base %>?page=<%= i %>" class="<%= i === page ? 'on' : '' %>"><%= i %></a>
+  <% } else if (Math.abs(i - page) === 3) { %><span>…</span><% } } %>
+</nav>
+<% } %>

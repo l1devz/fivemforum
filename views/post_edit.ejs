@@ -1,0 +1,15 @@
+<%- include('partials/head') %>
+
+<nav class="crumbs"><a href="/">Forumlar</a><%- include('partials/icon', { name: 'chevron', size: 14 }) %><a href="/thread/<%= post.thread_id %>"><%= post.thread_title %></a></nav>
+<div class="pagehead"><h1>Mesajı düzenle</h1></div>
+
+<form class="block formcard" method="post">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <%- include('partials/editor', { rows: 12, value: post.body }) %>
+  <div class="form-actions">
+    <a class="btn ghost" href="/post/<%= post.id %>">Vazgeç</a>
+    <button class="btn">Kaydet</button>
+  </div>
+</form>
+
+<%- include('partials/foot') %>

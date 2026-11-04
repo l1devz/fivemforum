@@ -1,0 +1,33 @@
+<%- include('../partials/head') %>
+<div class="admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <div class="pagehead"><div><h1>Konu önekleri</h1><p class="lead">Konu başlıklarının önündeki etiketler: Reklam, Tanıtım, Paket… Üyeler konu açarken seçer.</p></div></div>
+
+    <section class="block">
+      <% prefixes.forEach(function (p) { %>
+      <form method="post" class="prefix-edit">
+        <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="id" value="<%= p.id %>">
+        <span class="prefix-preview"><%- include('../partials/prefix', { pl: p.label, pc: p.color }) %></span>
+        <input name="label" value="<%= p.label %>" maxlength="24" aria-label="Önek adı" required>
+        <input type="color" name="color" value="<%= p.color %>" aria-label="Renk">
+        <input name="position" value="<%= p.position %>" type="number" class="pos" aria-label="Sıra">
+        <span class="meta"><%= p.used %> konu</span>
+        <button name="action" value="save" class="btn sm ghost">Kaydet</button>
+        <button name="action" value="delete" class="btn sm danger" data-confirm-click="“<%= p.label %>” öneki silinsin mi? Konular öneksiz kalır.">Sil</button>
+      </form>
+      <% }) %>
+      <form method="post" class="prefix-edit add">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <span class="prefix-preview"><span class="node-ic sm"><%- include('../partials/icon', { name: 'plus', size: 16 }) %></span></span>
+        <input name="label" placeholder="Yeni önek" maxlength="24" required aria-label="Yeni önek adı">
+        <input type="color" name="color" value="#4c8dff" aria-label="Renk">
+        <input name="position" value="<%= prefixes.length + 1 %>" type="number" class="pos" aria-label="Sıra">
+        <span></span>
+        <button name="action" value="add" class="btn sm">Ekle</button>
+        <span></span>
+      </form>
+    </section>
+  </div>
+</div>
+<%- include('../partials/foot') %>

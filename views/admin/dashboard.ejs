@@ -1,0 +1,38 @@
+<%- include('../partials/head') %>
+<div class="admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <div class="pagehead"><div><h1>Genel bakış</h1><p class="lead">Forumun şu anki durumu.</p></div></div>
+
+    <div class="tiles">
+      <div class="tile"><span>Üyeler</span><b><%= s.users %></b><em>+<%= s.users24 %> son 24 saat</em></div>
+      <div class="tile"><span>Konular</span><b><%= s.threads %></b><em>toplam</em></div>
+      <div class="tile"><span>Mesajlar</span><b><%= s.posts %></b><em>+<%= s.posts24 %> son 24 saat</em></div>
+      <div class="tile"><span>Çevrimiçi</span><b><%= s.online %></b><em><%= s.banned %> yasaklı hesap</em></div>
+    </div>
+
+    <div class="cols">
+      <section class="block col-main">
+        <header class="cat-head"><h2>Yeni üyeler</h2><a href="/admin/users" class="cat-count">Tümü</a></header>
+        <% newUsers.forEach(function (m) { %>
+        <div class="mrow simple">
+          <div class="mrow-main">
+            <%- include('../partials/avatar', { au: m, sz: 30 }) %>
+            <a href="/admin/users/<%= m.id %>"><%= m.username %></a>
+            <%- include('../partials/role', { r: m.role }) %>
+          </div>
+          <div class="meta"><%= timeAgo(m.created_at) %></div>
+        </div>
+        <% }) %>
+      </section>
+      <section class="block col-side">
+        <header class="cat-head"><h2>Son işlemler</h2><a href="/admin/log" class="cat-count">Tümü</a></header>
+        <ul class="side-list pad">
+          <% log.forEach(function (l) { %><li><span><%= l.action %></span><span class="meta"><%= l.username %> · <%= timeAgo(l.created_at) %></span></li><% }) %>
+          <% if (!log.length) { %><li class="meta">Henüz kayıt yok.</li><% } %>
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>
+<%- include('../partials/foot') %>

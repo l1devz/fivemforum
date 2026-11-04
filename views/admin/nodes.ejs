@@ -1,0 +1,100 @@
+<%
+const icons = ['chat','megaphone','book','code','map','car','help','server','coffee','file','users','shield','flag'];
+const iconNames = { chat: 'Sohbet', megaphone: 'Duyuru', book: 'Kitap', code: 'Kod', map: 'Harita', car: 'Araç', help: 'Yardım', server: 'Sunucu', coffee: 'Kahve', file: 'Dosya', users: 'Kişiler', shield: 'Kalkan', flag: 'Bayrak' };
+%>
+<%- include('../partials/head') %>
+<div class="admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <div class="pagehead"><div><h1>Forum yapısı</h1><p class="lead">Kategorileri ve forumları düzenle. Bir forumu düzenlemek için üzerine tıkla. Sıra numarası küçük olan önce gelir.</p></div></div>
+
+    <% categories.forEach(function (c) { %>
+    <section class="block fa-cat">
+      <form method="post" class="fa-cat-head">
+        <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="id" value="<%= c.id %>">
+        <span class="fa-cat-mark" aria-hidden="true"></span>
+        <input name="title" value="<%= c.title %>" class="fa-cat-title" aria-label="Kategori adı" required>
+        <label class="fa-pos-inline">Sıra <input name="position" value="<%= c.position %>" type="number" aria-label="Kategori sırası"></label>
+        <span class="meta"><%= c.forums.length %> forum</span>
+        <button name="action" value="cat_save" class="btn sm ghost">Kaydet</button>
+        <button name="action" value="cat_delete" class="iconbtn danger" title="Kategoriyi sil" aria-label="Kategoriyi sil" data-confirm-click="“<%= c.title %>” kategorisi ve içindeki tüm forumlar silinecek. Emin misin?"><%- include('../partials/icon', { name: 'trash', size: 16 }) %></button>
+      </form>
+
+      <% c.forums.forEach(function (f) { %>
+      <details class="fa-item">
+        <summary class="fa-row">
+          <span class="node-ic sm"><%- include('../partials/icon', { name: f.icon, size: 16 }) %></span>
+          <span class="fa-main">
+            <b><%= f.title %></b>
+            <span class="meta clip"><%= f.description || 'Açıklama yok' %></span>
+          </span>
+          <span class="fa-perms">
+            <span class="perm perm-<%= f.thread_level %>" title="Kim konu açabilir">Konu: <%= LEVELS[f.thread_level].short || LEVELS[f.thread_level].label %></span>
+            <span class="perm perm-<%= f.reply_level %>" title="Kim cevap yazabilir">Cevap: <%= LEVELS[f.reply_level].short || LEVELS[f.reply_level].label %></span>
+          </span>
+          <span class="fa-count"><b><%= f.threads %></b> konu</span>
+          <span class="fa-edit"><%- include('../partials/icon', { name: 'edit', size: 14 }) %> Düzenle</span>
+        </summary>
+
+        <form method="post" class="fa-form">
+          <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="id" value="<%= f.id %>">
+          <label class="field fa-span2">Forum adı<input name="title" value="<%= f.title %>" required></label>
+          <label class="field">Kategori
+            <select name="category_id"><% categories.forEach(function (cc) { %><option value="<%= cc.id %>" <%= cc.id === c.id ? 'selected' : '' %>><%= cc.title %></option><% }) %></select>
+          </label>
+          <label class="field">İkon
+            <select name="icon"><% icons.forEach(function (i) { %><option value="<%= i %>" <%= i === f.icon ? 'selected' : '' %>><%= iconNames[i] %></option><% }) %></select>
+          </label>
+          <label class="field fa-span4">Açıklama<input name="description" value="<%= f.description %>" placeholder="Forum listesinde başlığın altında görünür"></label>
+          <label class="field">Kim konu açabilir
+            <select name="thread_level"><% Object.keys(LEVELS).forEach(function (k) { %><option value="<%= k %>" <%= f.thread_level === k ? 'selected' : '' %>><%= LEVELS[k].label %></option><% }) %></select>
+          </label>
+          <label class="field">Kim cevap yazabilir
+            <select name="reply_level"><% Object.keys(LEVELS).forEach(function (k) { %><option value="<%= k %>" <%= f.reply_level === k ? 'selected' : '' %>><%= LEVELS[k].label %></option><% }) %></select>
+          </label>
+          <label class="field">Sıra<input name="position" value="<%= f.position %>" type="number"></label>
+          <div class="fa-actions">
+            <button name="action" value="forum_delete" class="btn sm danger" data-confirm-click="“<%= f.title %>” ve içindeki <%= f.threads %> konu silinecek. Emin misin?"><%- include('../partials/icon', { name: 'trash', size: 14 }) %> Forumu sil</button>
+            <button name="action" value="forum_save" class="btn sm">Kaydet</button>
+          </div>
+        </form>
+      </details>
+      <% }) %>
+
+      <details class="fa-item fa-add">
+        <summary class="fa-row">
+          <span class="node-ic sm"><%- include('../partials/icon', { name: 'plus', size: 16 }) %></span>
+          <span class="fa-main"><b>Bu kategoriye forum ekle</b></span>
+        </summary>
+        <form method="post" class="fa-form">
+          <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="category_id" value="<%= c.id %>">
+          <label class="field fa-span2">Forum adı<input name="title" placeholder="ör. Script Paylaşımı" required></label>
+          <label class="field">İkon
+            <select name="icon"><% icons.forEach(function (i) { %><option value="<%= i %>"><%= iconNames[i] %></option><% }) %></select>
+          </label>
+          <label class="field">Sıra<input name="position" value="<%= c.forums.length + 1 %>" type="number"></label>
+          <label class="field fa-span4">Açıklama<input name="description" placeholder="Forum listesinde başlığın altında görünür"></label>
+          <label class="field">Kim konu açabilir
+            <select name="thread_level"><% Object.keys(LEVELS).forEach(function (k) { %><option value="<%= k %>"><%= LEVELS[k].label %></option><% }) %></select>
+          </label>
+          <label class="field">Kim cevap yazabilir
+            <select name="reply_level"><% Object.keys(LEVELS).forEach(function (k) { %><option value="<%= k %>"><%= LEVELS[k].label %></option><% }) %></select>
+          </label>
+          <div class="fa-actions fa-span2">
+            <button name="action" value="forum_add" class="btn sm"><%- include('../partials/icon', { name: 'plus', size: 14 }) %> Forumu ekle</button>
+          </div>
+        </form>
+      </details>
+    </section>
+    <% }) %>
+
+    <form method="post" class="block fa-newcat">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <span class="node-ic sm"><%- include('../partials/icon', { name: 'plus', size: 16 }) %></span>
+      <input name="title" placeholder="Yeni kategori adı" required aria-label="Yeni kategori adı">
+      <label class="fa-pos-inline">Sıra <input name="position" value="<%= categories.length + 1 %>" type="number" aria-label="Sıra"></label>
+      <button name="action" value="cat_add" class="btn sm">Kategori ekle</button>
+    </form>
+  </div>
+</div>
+<%- include('../partials/foot') %>

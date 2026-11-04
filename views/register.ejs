@@ -1,0 +1,19 @@
+<%- include('partials/head') %>
+<div class="auth">
+  <div class="auth-side">
+    <span class="logo-mark lg" aria-hidden="true"></span>
+    <h1>Aramıza katıl.</h1>
+    <p>Kayıt olmak saniyeler sürer. Sonra istediğin kadar konu aç.</p>
+  </div>
+  <form class="block formcard auth-form" method="post" action="/register">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <h2>Kayıt ol</h2>
+    <% if (error) { %><div class="flash flash-error"><%= error %></div><% } %>
+    <label class="field">Kullanıcı adı<input name="username" value="<%= username %>" maxlength="24" autocomplete="username" required autofocus></label>
+    <label class="field">Şifre<input type="password" name="password" autocomplete="new-password" required></label>
+    <label class="field">Şifre (tekrar)<input type="password" name="password2" autocomplete="new-password" required></label>
+    <button class="btn block-btn">Hesap oluştur</button>
+    <p class="meta center">Zaten üye misin? <a href="/login">Giriş yap</a></p>
+  </form>
+</div>
+<%- include('partials/foot') %>

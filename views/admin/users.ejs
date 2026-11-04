@@ -1,0 +1,29 @@
+<%- include('../partials/head') %>
+<div class="admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <div class="pagehead"><div><h1>Kullanıcılar</h1><p class="lead">Rol ver, ünvan ata, yasakla.</p></div></div>
+    <form class="block searchbar" method="get">
+      <%- include('../partials/icon', { name: 'search', size: 18 }) %>
+      <input name="q" value="<%= q %>" placeholder="Kullanıcı adı ara">
+      <button class="btn">Ara</button>
+    </form>
+    <section class="block">
+      <div class="mlist-head"><span>Kullanıcı</span><span>Rol</span><span>Mesaj</span><span>Son görülme</span></div>
+      <% users.forEach(function (m) { %>
+      <a class="mrow link" href="/admin/users/<%= m.id %>">
+        <div class="mrow-main">
+          <%- include('../partials/avatar', { au: m, sz: 32 }) %>
+          <strong<% if (m.name_color) { %> style="color:<%= m.name_color %>"<% } %>><%= m.username %></strong>
+          <% if (m.is_banned) { %><span class="role role-banned">Yasaklı</span><% } %>
+        </div>
+        <div><%- include('../partials/role', { r: m.role }) %></div>
+        <div class="num"><%= m.posts %></div>
+        <div class="meta"><%= timeAgo(m.last_seen) %></div>
+      </a>
+      <% }) %>
+      <% if (!users.length) { %><div class="empty">Kullanıcı bulunamadı.</div><% } %>
+    </section>
+  </div>
+</div>
+<%- include('../partials/foot') %>

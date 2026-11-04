@@ -1,0 +1,1 @@
+<% const _r = ROLES[r] || ROLES.member; %><span class="role <%= _r.cls %>"><% if (r === 'admin') { %><%- include('icon', { name: 'shield', size: 13 }) %><% } else if (r === 'moderator') { %><%- include('icon', { name: 'flag', size: 13 }) %><% } %><%= _r.label %></span>

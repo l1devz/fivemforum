@@ -1,0 +1,59 @@
+<%- include('partials/head') %>
+
+<nav class="crumbs"><a href="/">Forumlar</a><%- include('partials/icon', { name: 'chevron', size: 14 }) %><span><%= forum.category %></span></nav>
+
+<div class="pagehead">
+  <div>
+    <h1><%= forum.title %></h1>
+    <% if (forum.description) { %><p class="lead"><%= forum.description %></p><% } %>
+  </div>
+  <% if (canPost) { %>
+    <a class="btn" href="/forum/<%= forum.id %>/new"><%- include('partials/icon', { name: 'plus', size: 16 }) %> Konu aç</a>
+  <% } else if (forum.thread_level !== 'member') { %>
+    <span class="readonly-note"><%- include('partials/icon', { name: 'shield', size: 15 }) %> Bu bölüme yalnızca <%= forum.thread_level === 'admin' ? 'yöneticiler' : 'yetkililer' %> yazabilir</span>
+  <% } else if (!user) { %>
+    <a class="btn ghost" href="/login?next=/forum/<%= forum.id %>/new">Konu açmak için giriş yap</a>
+  <% } %>
+</div>
+
+<% if (usedPrefixes.length) { %>
+<nav class="prefix-chips" aria-label="Öneke göre filtrele">
+  <a href="/forum/<%= forum.id %>" class="<%= prefixFilter ? '' : 'on' %>">Tümü</a>
+  <% usedPrefixes.forEach(function (p) { %>
+  <a href="/forum/<%= forum.id %>?prefix=<%= p.id %>" class="<%= prefixFilter === p.id ? 'on' : '' %>"><%- include('partials/prefix', { pl: p.label, pc: p.color }) %> <b><%= p.n %></b></a>
+  <% }) %>
+</nav>
+<% } %>
+
+<section class="block">
+  <div class="tlist-head">
+    <span>Konu</span><span>Cevap</span><span>Görüntülenme</span><span>Son mesaj</span>
+  </div>
+  <% if (!threads.length) { %><div class="empty">Bu forumda henüz konu açılmamış. İlk konuyu sen aç.</div><% } %>
+  <% threads.forEach(function (t) { %>
+  <div class="trow<%= t.is_pinned ? ' pinned' : '' %>">
+    <div class="trow-main">
+      <%- include('partials/avatar', { au: t, sz: 36 }) %>
+      <div>
+        <div class="trow-title">
+          <% if (t.is_pinned) { %><span class="flag flag-pin"><%- include('partials/icon', { name: 'pin', size: 12 }) %>Sabit</span><% } %>
+          <% if (t.is_locked) { %><span class="flag flag-lock"><%- include('partials/icon', { name: 'lock', size: 12 }) %>Kilitli</span><% } %>
+          <%- include('partials/prefix', { pl: t.prefix_label, pc: t.prefix_color }) %>
+          <a href="/thread/<%= t.id %>"><%= t.title %></a>
+        </div>
+        <span class="meta"><%- include('partials/uname', { nid: t.uid, nname: t.username, ncolor: t.name_color }) %> · <%= timeAgo(t.created_at) %></span>
+      </div>
+    </div>
+    <div class="num"><%= short(t.replies) %></div>
+    <div class="num"><%= short(t.views) %></div>
+    <div class="trow-last">
+      <span><%= timeAgo(t.last_post_at) %></span>
+      <a href="/member/<%= t.luid %>" class="meta"<% if (t.lcolor) { %> style="color:<%= t.lcolor %>"<% } %>><%= t.lusername %></a>
+    </div>
+  </div>
+  <% }) %>
+</section>
+
+<%- include('partials/pager', { base: '/forum/' + forum.id }) %>
+
+<%- include('partials/foot') %>

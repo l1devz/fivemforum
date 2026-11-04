@@ -1,0 +1,9 @@
+<nav class="admin-nav block">
+  <span class="admin-nav-label">Yönetim</span>
+  <a href="/admin" class="<%= adminNav === '/' ? 'on' : '' %>"><%- include('../partials/icon', { name: 'grid', size: 16 }) %> Genel bakış</a>
+  <a href="/admin/nodes" class="<%= adminNav.startsWith('/nodes') ? 'on' : '' %>"><%- include('../partials/icon', { name: 'list', size: 16 }) %> Forum yapısı</a>
+  <a href="/admin/prefixes" class="<%= adminNav.startsWith('/prefixes') ? 'on' : '' %>"><%- include('../partials/icon', { name: 'flag', size: 16 }) %> Konu önekleri</a>
+  <a href="/admin/users" class="<%= adminNav.startsWith('/users') ? 'on' : '' %>"><%- include('../partials/icon', { name: 'users', size: 16 }) %> Kullanıcılar</a>
+  <a href="/admin/settings" class="<%= adminNav.startsWith('/settings') ? 'on' : '' %>"><%- include('../partials/icon', { name: 'settings', size: 16 }) %> Site ayarları</a>
+  <a href="/admin/log" class="<%= adminNav.startsWith('/log') ? 'on' : '' %>"><%- include('../partials/icon', { name: 'clock', size: 16 }) %> İşlem kayıtları</a>
+</nav>

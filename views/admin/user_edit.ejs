@@ -1,0 +1,64 @@
+<%- include('../partials/head') %>
+<div class="admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <nav class="crumbs"><a href="/admin/users">Kullanıcılar</a><%- include('../partials/icon', { name: 'chevron', size: 14 }) %><span><%= member.username %></span></nav>
+    <div class="pagehead">
+      <div class="inline-id">
+        <%- include('../partials/avatar', { au: member, sz: 56 }) %>
+        <div><h1<% if (member.name_color) { %> style="color:<%= member.name_color %>"<% } %>><%= member.username %></h1>
+        <p class="meta">#<%= member.id %> · Kayıt <%= fullDate(member.created_at) %></p></div>
+      </div>
+      <a class="btn ghost" href="/member/<%= member.id %>">Profili gör</a>
+    </div>
+
+    <div class="cols">
+      <form class="block formcard col-main" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <input type="hidden" name="action" value="save">
+        <h2>Yetki & görünüm</h2>
+        <div class="field">Rol
+          <div class="radio-row">
+            <% Object.keys(roles).forEach(function (k) { %>
+            <label class="radio-card"><input type="radio" name="role" value="<%= k %>" <%= member.role === k ? 'checked' : '' %>><%- include('../partials/role', { r: k }) %></label>
+            <% }) %>
+          </div>
+        </div>
+        <label class="field">Ünvan <small>Profilde rozetin üstünde görünür. Ör: Yönetici, Script Geliştirici</small><input name="title" maxlength="40" value="<%= member.title || '' %>"></label>
+        <div class="field">İsim rengi
+          <div class="color-row">
+            <label class="check"><input type="checkbox" name="use_color" value="1" <%= member.name_color ? 'checked' : '' %>> Özel renk kullan</label>
+            <input type="color" name="name_color" value="<%= member.name_color || '#7b5cff' %>" oninput="this.nextElementSibling.textContent = this.value" aria-label="İsim rengi">
+            <span class="color-code"><%= member.name_color || '#7b5cff' %></span>
+          </div>
+        </div>
+        <label class="field">Yeni şifre <small>Boş bırakırsan değişmez.</small><input type="text" name="new_password" autocomplete="off"></label>
+        <label class="check warn"><input type="checkbox" name="is_banned" value="1" <%= member.is_banned ? 'checked' : '' %> <%= member.id === user.id ? 'disabled' : '' %>> Hesabı yasakla<% if (member.id === user.id) { %> <small class="dim">(kendi hesabını yasaklayamazsın)</small><% } %></label>
+        <div class="form-actions"><button class="btn">Kaydet</button></div>
+      </form>
+
+      <div class="col-side side-stack">
+      <% if (member.avatar_url || member.banner_url) { %>
+      <form class="block formcard" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <h2>Profil görselleri</h2>
+        <p class="meta">Uygunsuz bir avatar veya kapak görselini buradan kaldırabilirsin.</p>
+        <div class="form-actions">
+          <% if (member.avatar_url) { %><button name="action" value="remove_avatar" class="btn sm ghost">Avatarı kaldır</button><% } %>
+          <% if (member.banner_url) { %><button name="action" value="remove_banner" class="btn sm ghost">Kapağı kaldır</button><% } %>
+        </div>
+      </form>
+      <% } %>
+      <% if (member.id !== user.id) { %>
+      <form class="block formcard danger-zone" method="post" data-confirm="<%= member.username %> ve tüm konu/mesajları kalıcı olarak silinecek. Emin misin?">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <h2>Tehlikeli bölge</h2>
+        <p class="meta">Kullanıcıyı, açtığı konuları ve yazdığı tüm mesajları siler. Geri alınamaz.</p>
+        <button name="action" value="delete" class="btn danger">Kullanıcıyı sil</button>
+      </form>
+      <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/foot') %>

@@ -1,0 +1,37 @@
+<%- include('../partials/head') %>
+
+<div class="pagehead">
+  <div><h1>Özel mesajlar</h1><p class="lead">Sadece katılımcıların görebildiği sohbetler.</p></div>
+  <a class="btn" href="/conversations/new"><%- include('../partials/icon', { name: 'plus', size: 16 }) %> Yeni mesaj</a>
+</div>
+
+<section class="block">
+  <% if (!items.length) { %>
+    <div class="empty">Henüz bir sohbetin yok. Birine yazmak için <a href="/conversations/new" class="acc-link">yeni mesaj</a> başlat ya da bir üyenin profilindeki “Mesaj gönder” butonunu kullan.</div>
+  <% } %>
+  <% items.forEach(function (c) {
+       const others = c.participants.filter(function (p) { return p.id !== user.id; });
+       const face = others[0] || c.participants[0]; %>
+  <a class="convrow<%= c.unread ? ' unread' : '' %>" href="/conversations/<%= c.id %>">
+    <span class="convrow-av">
+      <%- include('../partials/avatar', { au: face, sz: 44 }) %>
+      <% if (others.length > 1) { %><span class="convrow-more">+<%= others.length - 1 %></span><% } %>
+    </span>
+    <span class="convrow-main">
+      <span class="convrow-top">
+        <b class="clip"><%= c.title %></b>
+        <span class="meta"><%= timeAgo(c.last_message_at) %></span>
+      </span>
+      <span class="convrow-with meta">
+        <%= others.length ? others.map(function (p) { return p.username; }).join(', ') : 'Sadece sen' %> · <%= c.message_count %> mesaj
+      </span>
+      <span class="convrow-snip clip"><%= c.last_uid === user.id ? 'Sen: ' : (c.last_username ? c.last_username + ': ' : '') %><%= (c.last_body || '').replace(/\[[^\]]+\]/g, '') %></span>
+    </span>
+    <% if (c.unread) { %><span class="notif-dot" aria-label="Okunmadı"></span><% } %>
+  </a>
+  <% }) %>
+</section>
+
+<%- include('../partials/pager', { base: '/conversations' }) %>
+
+<%- include('../partials/foot') %>

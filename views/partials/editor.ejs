@@ -1,0 +1,16 @@
+<div class="editor">
+  <div class="editor-bar" role="toolbar">
+    <button type="button" data-tag="b" title="Kalın"><b>B</b></button>
+    <button type="button" data-tag="i" title="İtalik"><i>I</i></button>
+    <button type="button" data-tag="u" title="Altı çizili"><u>U</u></button>
+    <button type="button" data-tag="s" title="Üstü çizili"><s>S</s></button>
+    <span class="sep"></span>
+    <button type="button" data-tag="url" title="Bağlantı">URL</button>
+    <button type="button" data-tag="img" title="Görsel">IMG</button>
+    <button type="button" data-tag="quote" title="Alıntı"><%- include('icon', { name: 'quote', size: 15 }) %></button>
+    <button type="button" data-tag="code" title="Kod"><%- include('icon', { name: 'code', size: 15 }) %></button>
+    <button type="button" data-tag="media" title="YouTube videosu">VİDEO</button>
+    <button type="button" data-tag="spoiler" title="Spoiler">SPOILER</button>
+  </div>
+  <textarea name="body" rows="<%= typeof rows !== 'undefined' ? rows : 8 %>" placeholder="Mesajını yaz…" required><%= typeof value !== 'undefined' ? value : '' %></textarea>
+</div>

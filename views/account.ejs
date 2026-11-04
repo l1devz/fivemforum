@@ -1,0 +1,73 @@
+<%- include('partials/head') %>
+
+<div class="pagehead"><div><h1>Hesap ayarları</h1><p class="lead">Profilinde görünen bilgileri düzenle.</p></div>
+  <a class="btn ghost" href="/member/<%= user.id %>">Profili görüntüle</a></div>
+<% if (error) { %><div class="flash flash-error"><%= error %></div><% } %>
+
+<section class="block imgcard" id="gorseller">
+  <header class="cat-head"><h2>Profil görselleri</h2></header>
+
+  <div class="imgcard-banner" data-preview="banner"<% if (user.banner_url) { %> style="background-image:url('<%= user.banner_url %>')"<% } else { %> style="--h:<%= hue(user.username) %>"<% } %>>
+    <div class="imgcard-av" data-preview="avatar"><%- include('partials/avatar', { au: user, sz: 112 }) %></div>
+  </div>
+
+  <div class="imgcard-rows">
+    <% [
+      { kind: 'avatar', title: 'Avatar', hint: 'JPG, PNG, GIF veya WEBP · en fazla 2 MB · ortadan kare kırpılır', cur: user.avatar_url },
+      { kind: 'banner', title: 'Kapak görseli', hint: 'JPG, PNG, GIF veya WEBP · en fazla 5 MB · önerilen 1500×400', cur: user.banner_url },
+    ].forEach(function (r) { %>
+    <div class="imgrow">
+      <div class="imgrow-info">
+        <strong><%= r.title %></strong>
+        <span class="meta"><%= r.hint %></span>
+      </div>
+      <form class="imgrow-upload" method="post" enctype="multipart/form-data" action="/account/upload/<%= r.kind %>?_csrf=<%= csrf %>" data-kind="<%= r.kind %>">
+        <label class="btn ghost sm filepick">
+          <%- include('partials/icon', { name: 'plus', size: 14 }) %> <span>Görsel seç</span>
+          <input type="file" name="image" accept="image/png,image/jpeg,image/gif,image/webp" required>
+        </label>
+        <button class="btn sm" hidden>Yükle</button>
+      </form>
+      <% if (r.cur) { %>
+      <form method="post" action="/account/image/<%= r.kind %>">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <button name="action" value="remove" class="btn sm danger">Kaldır</button>
+      </form>
+      <% } %>
+    </div>
+    <% }) %>
+
+    <details class="urlbox">
+      <summary>Bağlantı ile ekle</summary>
+      <% ['avatar', 'banner'].forEach(function (k) { %>
+      <form method="post" action="/account/image/<%= k %>" class="urlrow">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <input name="url" placeholder="<%= k === 'avatar' ? 'Avatar' : 'Kapak' %> görseli adresi — https://…" required>
+        <button name="action" value="url" class="btn sm ghost">Kaydet</button>
+      </form>
+      <% }) %>
+    </details>
+  </div>
+</section>
+
+<div class="cols">
+  <form class="block formcard col-main" method="post" action="/account">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <input type="hidden" name="form" value="profile">
+    <h2>Profil</h2>
+    <label class="field">Konum<input name="location" maxlength="60" value="<%= user.location || '' %>"></label>
+    <label class="field">Hakkında<textarea name="about" rows="5"><%= user.about || '' %></textarea></label>
+    <div class="form-actions"><button class="btn">Kaydet</button></div>
+  </form>
+
+  <form class="block formcard col-side" method="post" action="/account">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <input type="hidden" name="form" value="password">
+    <h2>Şifre</h2>
+    <label class="field">Mevcut şifre<input type="password" name="current" autocomplete="current-password" required></label>
+    <label class="field">Yeni şifre<input type="password" name="next" autocomplete="new-password" required></label>
+    <div class="form-actions"><button class="btn">Şifreyi değiştir</button></div>
+  </form>
+</div>
+
+<%- include('partials/foot') %>

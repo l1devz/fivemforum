@@ -1,0 +1,14 @@
+<%- include('../partials/head') %>
+<div class="admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <div class="pagehead"><div><h1>İşlem kayıtları</h1><p class="lead">Yönetici ve moderatörlerin yaptığı işlemler.</p></div></div>
+    <section class="block">
+      <% log.forEach(function (l) { %>
+      <div class="logrow"><span class="mono dim"><%= fullDate(l.created_at) %></span><strong><%= l.username %></strong><span><%= l.action %></span></div>
+      <% }) %>
+      <% if (!log.length) { %><div class="empty">Henüz kayıt yok.</div><% } %>
+    </section>
+  </div>
+</div>
+<%- include('../partials/foot') %>

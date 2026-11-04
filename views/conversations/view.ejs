@@ -1,0 +1,74 @@
+<%- include('../partials/head') %>
+
+<nav class="crumbs"><a href="/conversations">Özel mesajlar</a></nav>
+<div class="pagehead">
+  <div>
+    <h1><%= c.title %></h1>
+    <p class="meta"><%- include('../partials/icon', { name: 'lock', size: 14 }) %> Özel sohbet · <%= fullDate(c.created_at) %> tarihinde başladı</p>
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-main">
+    <%- include('../partials/pager', { base: '/conversations/' + c.id }) %>
+    <section class="block convo">
+      <% let marked = false;
+         messages.forEach(function (m) {
+           const mine = m.uid === user.id;
+           if (!marked && !mine && m.created_at > lastRead && lastRead > 0) { marked = true; %>
+        <div class="newline"><span>Yeni mesajlar</span></div>
+      <% } %>
+      <article class="msg<%= mine ? ' mine' : '' %>" id="msg-<%= m.id %>">
+        <a href="/member/<%= m.uid %>" class="msg-av"><%- include('../partials/avatar', { au: m, sz: 40 }) %></a>
+        <div class="msg-main">
+          <header class="msg-head">
+            <%- include('../partials/uname', { nid: m.uid, nname: m.username, ncolor: m.name_color }) %>
+            <% if (m.role !== 'member') { %><%- include('../partials/role', { r: m.role }) %><% } %>
+            <span class="meta" title="<%= fullDate(m.created_at) %>"><%= timeAgo(m.created_at) %></span>
+          </header>
+          <div class="bb"><%- renderBody(m.body) %></div>
+        </div>
+      </article>
+      <% }) %>
+    </section>
+    <%- include('../partials/pager', { base: '/conversations/' + c.id }) %>
+
+    <form class="block reply" method="post" action="/conversations/<%= c.id %>/reply" id="reply">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="reply-who"><%- include('../partials/avatar', { au: user, sz: 40 }) %></div>
+      <div class="reply-main">
+        <%- include('../partials/editor', { rows: 5 }) %>
+        <div class="form-actions"><span class="meta"><kbd class="kbd">Ctrl</kbd> + <kbd class="kbd">Enter</kbd> ile gönder</span><button class="btn"><%- include('../partials/icon', { name: 'send', size: 16 }) %> Gönder</button></div>
+      </div>
+    </form>
+  </div>
+
+  <aside class="col-side">
+    <section class="block side">
+      <h3>Katılımcılar <span class="count"><%= people.filter(function (p) { return !p.has_left; }).length %></span></h3>
+      <ul class="people">
+        <% people.forEach(function (p) { %>
+        <li class="<%= p.has_left ? 'left' : '' %>">
+          <%- include('../partials/avatar', { au: p, sz: 30 }) %>
+          <%- include('../partials/uname', { nid: p.id, nname: p.username, ncolor: p.name_color }) %>
+          <% if (p.id === c.starter_id) { %><span class="meta">başlatan</span><% } %>
+          <% if (p.has_left) { %><span class="meta">ayrıldı</span><% } %>
+        </li>
+        <% }) %>
+      </ul>
+      <% if (isStarter) { %>
+      <form method="post" action="/conversations/<%= c.id %>/invite" class="invite">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <input name="to" placeholder="Kişi ekle: kullanıcı adı" required aria-label="Davet edilecek kullanıcı">
+        <button class="btn sm ghost" title="Davet et"><%- include('../partials/icon', { name: 'userplus', size: 15 }) %></button>
+      </form>
+      <% } %>
+    </section>
+    <form method="post" action="/conversations/<%= c.id %>/leave" data-confirm="Sohbetten ayrılmak istiyor musun? Biri yeni mesaj yazarsa listende tekrar görünür.">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <button class="btn ghost block-btn sm"><%- include('../partials/icon', { name: 'logout', size: 15 }) %> Sohbetten ayrıl</button>
+    </form>
+  </aside>
+</div>
+
+<%- include('../partials/foot') %>

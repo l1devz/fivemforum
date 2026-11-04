@@ -1,0 +1,21 @@
+<%- include('../partials/head') %>
+
+<nav class="crumbs"><a href="/conversations">Özel mesajlar</a><%- include('../partials/icon', { name: 'chevron', size: 14 }) %><span>Yeni mesaj</span></nav>
+<div class="pagehead"><h1>Yeni mesaj</h1></div>
+
+<form class="block formcard" method="post" action="/conversations/new">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <% if (error) { %><div class="flash flash-error"><%= error %></div><% } %>
+  <label class="field">Alıcılar <small>Kullanıcı adlarını virgülle ayır. En fazla 5 kişi.</small>
+    <input name="to" value="<%= form.to %>" placeholder="ör. ahmet, mehmet" required <%= form.to ? '' : 'autofocus' %> autocomplete="off">
+  </label>
+  <label class="field">Konu<input name="title" maxlength="100" value="<%= form.title %>" required <%= form.to ? 'autofocus' : '' %>></label>
+  <%- include('../partials/editor', { rows: 10, value: form.body }) %>
+  <div class="form-actions">
+    <span class="meta lock-note"><%- include('../partials/icon', { name: 'lock', size: 14 }) %> Bu sohbeti sadece katılımcılar görebilir.</span>
+    <a class="btn ghost" href="/conversations">Vazgeç</a>
+    <button class="btn"><%- include('../partials/icon', { name: 'send', size: 16 }) %> Gönder</button>
+  </div>
+</form>
+
+<%- include('../partials/foot') %>

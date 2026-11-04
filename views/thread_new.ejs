@@ -1,0 +1,29 @@
+<%- include('partials/head') %>
+
+<nav class="crumbs"><a href="/">Forumlar</a><%- include('partials/icon', { name: 'chevron', size: 14 }) %><a href="/forum/<%= forum.id %>"><%= forum.title %></a></nav>
+<div class="pagehead"><h1>Yeni konu</h1></div>
+
+<form class="block formcard" method="post">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <% if (error) { %><div class="flash flash-error"><%= error %></div><% } %>
+  <div class="field">Önek <small>Konunun türünü seç; başlığın önünde görünür.</small>
+    <div class="prefix-pick" role="radiogroup">
+      <label><input type="radio" name="prefix_id" value="" <%= form.prefix_id ? '' : 'checked' %>><span class="prefix-none">Önek yok</span></label>
+      <% prefixes.forEach(function (p) { %>
+      <label><input type="radio" name="prefix_id" value="<%= p.id %>" <%= form.prefix_id === p.id ? 'checked' : '' %>><%- include('partials/prefix', { pl: p.label, pc: p.color }) %></label>
+      <% }) %>
+    </div>
+  </div>
+  <label class="field">Başlık<input name="title" maxlength="120" value="<%= form.title || '' %>" required autofocus></label>
+  <%- include('partials/editor', { rows: 12, value: form.body || '' }) %>
+  <div class="form-actions">
+    <% if (isStaff) { %>
+      <label class="check"><input type="checkbox" name="pin" value="1"> Forumda sabitle</label>
+      <label class="check"><input type="checkbox" name="feature" value="1"> Ana sayfada öne çıkar</label>
+    <% } %>
+    <a class="btn ghost" href="/forum/<%= forum.id %>">Vazgeç</a>
+    <button class="btn">Konuyu yayınla</button>
+  </div>
+</form>
+
+<%- include('partials/foot') %>

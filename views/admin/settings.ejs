@@ -1,0 +1,15 @@
+<%- include('../partials/head') %>
+<div class="admin">
+  <%- include('_nav') %>
+  <div class="admin-main">
+    <div class="pagehead"><div><h1>Site ayarları</h1><p class="lead">Forumun adı, sloganı ve ana sayfa duyurusu.</p></div></div>
+    <form class="block formcard" method="post">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label class="field">Site adı<input name="site_name" maxlength="40" value="<%= site.name %>" required></label>
+      <label class="field">Slogan<input name="site_tagline" maxlength="120" value="<%= site.tagline %>"></label>
+      <label class="field">Duyuru şeridi <small>Boş bırakırsan gizlenir.</small><input name="announcement" maxlength="300" value="<%= site.announcement %>"></label>
+      <div class="form-actions"><button class="btn">Kaydet</button></div>
+    </form>
+  </div>
+</div>
+<%- include('../partials/foot') %>

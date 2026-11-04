@@ -1,0 +1,47 @@
+<%- include('partials/head') %>
+
+<div class="pagehead">
+  <div><h1>Üyeler</h1><p class="lead">Toplulukta <%= members.length %> kişi listeleniyor.</p></div>
+  <nav class="seg">
+    <a href="/members" class="<%= sort === 'posts' ? 'on' : '' %>">En çok mesaj</a>
+    <a href="/members?sort=new" class="<%= sort === 'new' ? 'on' : '' %>">En yeni</a>
+  </nav>
+</div>
+
+<% if (staff.length) { %>
+<section class="block">
+  <header class="cat-head"><h2>Ekip</h2></header>
+  <div class="staff-grid">
+    <% staff.forEach(function (m) { %>
+    <a class="staff-card" href="/member/<%= m.id %>">
+      <%- include('partials/avatar', { au: m, sz: 52 }) %>
+      <div>
+        <strong<% if (m.name_color) { %> style="color:<%= m.name_color %>"<% } %>><%= m.username %></strong>
+        <%- include('partials/role', { r: m.role }) %>
+      </div>
+    </a>
+    <% }) %>
+  </div>
+</section>
+<% } %>
+
+<section class="block">
+  <div class="mlist-head"><span>Üye</span><span>Mesaj</span><span>Tepki</span><span>Katılım</span></div>
+  <% members.forEach(function (m, i) { %>
+  <div class="mrow">
+    <div class="mrow-main">
+      <span class="rank"><%= String(i + 1).padStart(2, '0') %></span>
+      <%- include('partials/avatar', { au: m, sz: 34 }) %>
+      <div>
+        <%- include('partials/uname', { nid: m.id, nname: m.username, ncolor: m.name_color }) %>
+        <% if (m.title) { %><span class="meta"><%= m.title %></span><% } %>
+      </div>
+    </div>
+    <div class="num"><%= m.posts %></div>
+    <div class="num"><%= m.score %></div>
+    <div class="meta"><%= new Date(m.created_at).toLocaleDateString('tr-TR') %></div>
+  </div>
+  <% }) %>
+</section>
+
+<%- include('partials/foot') %>

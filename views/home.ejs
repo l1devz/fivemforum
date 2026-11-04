@@ -1,0 +1,157 @@
+<%- include('partials/head') %>
+
+<% if (ticker.length) { %>
+<section class="ticker block" data-ticker>
+  <span class="ticker-label"><%- include('partials/icon', { name: 'megaphone', size: 15 }) %> Gündem</span>
+  <div class="ticker-track">
+    <% ticker.forEach(function (t, i) { %>
+    <a class="ticker-item<%= i === 0 ? ' on' : '' %>" href="/thread/<%= t.id %>">
+      <%- include('partials/avatar', { au: t, sz: 24 }) %>
+      <%- include('partials/prefix', { pl: t.prefix_label, pc: t.prefix_color }) %>
+      <span class="ticker-title"><%= t.title %></span>
+    </a>
+    <% }) %>
+  </div>
+  <div class="ticker-meta">
+    <% ticker.forEach(function (t, i) { %>
+    <span class="ticker-stat<%= i === 0 ? ' on' : '' %>"><%- include('partials/icon', { name: 'reply', size: 13 }) %> <%= t.replies %> &nbsp; <%- include('partials/icon', { name: 'eye', size: 13 }) %> <%= short(t.views) %></span>
+    <% }) %>
+  </div>
+  <div class="ticker-ctrl">
+    <button type="button" data-tk="prev" aria-label="Önceki"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <button type="button" data-tk="pause" aria-label="Duraklat"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg></button>
+    <button type="button" data-tk="next" aria-label="Sonraki"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button>
+  </div>
+</section>
+<% } %>
+
+<div class="cols home-cols">
+  <div class="col-main">
+
+    <section class="block hometabs" data-tabs>
+      <nav class="hometabs-bar" role="tablist">
+        <% tabs.forEach(function (tab, i) { %>
+        <button type="button" role="tab" data-tab="<%= tab.key %>" class="<%= i === 0 ? 'on' : '' %>" aria-selected="<%= i === 0 %>">
+          <%- include('partials/icon', { name: tab.icon, size: 15 }) %> <%= tab.label %>
+        </button>
+        <% }) %>
+      </nav>
+
+      <% tabs.forEach(function (tab, i) { %>
+      <div class="ttable" data-panel="<%= tab.key %>" <%= i === 0 ? '' : 'hidden' %>>
+        <div class="ttable-head">
+          <span>#</span><span>Konu</span><span>Forum</span><span>Cevap</span><span>Görüntülenme</span><span><%= tab.key === 'newest' ? 'Açılış' : 'Son mesaj' %></span><span>Son yazan</span>
+        </div>
+        <% if (!tab.rows.length) { %><div class="empty">Henüz konu yok.</div><% } %>
+        <% tab.rows.forEach(function (t, n) { %>
+        <div class="ttable-row<%= t.is_featured && tab.key === 'latest' ? ' featured' : '' %>">
+          <span class="ttable-no"><%= n + 1 %></span>
+          <span class="ttable-topic">
+            <%- include('partials/avatar', { au: t, sz: 28 }) %>
+            <%- include('partials/prefix', { pl: t.prefix_label, pc: t.prefix_color }) %>
+            <a href="/thread/<%= t.id %><%= tab.key === 'latest' ? '?page=last' : '' %>" class="clip" title="<%= t.title %>"><%= t.title %></a>
+            <% if (t.is_locked) { %><span class="ttable-lock" title="Kilitli"><%- include('partials/icon', { name: 'lock', size: 13 }) %></span><% } %>
+          </span>
+          <span class="ttable-forum">
+            <% if (t.is_featured && tab.key === 'latest') { %>
+              <span class="feat-pill"><%- include('partials/icon', { name: 'pin', size: 12 }) %> Sabit konu</span>
+            <% } else { %>
+              <a href="/forum/<%= t.forum_id %>" class="clip"><%= t.forum_title %></a>
+            <% } %>
+          </span>
+          <span class="num"><%= short(t.replies) %></span>
+          <span class="num"><%= short(t.views) %></span>
+          <span class="ttable-date"><%= timeAgo(tab.key === 'newest' ? t.created_at : t.last_post_at) %></span>
+          <span class="ttable-last">
+            <%- include('partials/avatar', { au: { username: t.lusername || t.username, avatar_url: t.lavatar }, sz: 22 }) %>
+            <a href="/member/<%= t.luid %>" class="clip"<% if (t.lcolor) { %> style="color:<%= t.lcolor %>"<% } %>><%= t.lusername %></a>
+          </span>
+        </div>
+        <% }) %>
+      </div>
+      <% }) %>
+    </section>
+
+    <% categories.forEach(function (c) { %>
+    <section class="block cat">
+      <header class="cat-head">
+        <h2><%= c.title %></h2>
+        <span class="cat-count"><%= c.forums.length %> forum</span>
+      </header>
+      <% if (!c.forums.length) { %><div class="empty">Bu kategoride henüz forum yok.</div><% } %>
+      <% c.forums.forEach(function (f) { %>
+      <div class="node">
+        <div class="node-ic"><%- include('partials/icon', { name: f.icon, size: 20 }) %></div>
+        <div class="node-main">
+          <a class="node-title" href="/forum/<%= f.id %>"><%= f.title %></a><% if (f.thread_level === 'admin' && f.reply_level === 'admin') { %><span class="node-lock" title="Sadece yöneticiler yazabilir"><%- include('partials/icon', { name: 'lock', size: 14 }) %></span><% } %>
+          <% if (f.description) { %><p class="node-desc"><%= f.description %></p><% } %>
+        </div>
+        <div class="node-stats">
+          <div><span>Konu</span><b><%= short(f.stats.threads) %></b></div>
+          <div><span>Mesaj</span><b><%= short(f.stats.posts) %></b></div>
+        </div>
+        <div class="node-last">
+          <% if (f.last) { %>
+            <%- include('partials/avatar', { au: f.last, sz: 32 }) %>
+            <div class="node-last-txt">
+              <a href="/thread/<%= f.last.tid %>?page=last" class="clip"><%= f.last.title %></a>
+              <span class="meta"><%= timeAgo(f.last.created_at) %> · <%- include('partials/uname', { nid: f.last.uid, nname: f.last.username, ncolor: f.last.name_color }) %></span>
+            </div>
+          <% } else { %>
+            <span class="meta">Henüz mesaj yok</span>
+          <% } %>
+        </div>
+      </div>
+      <% }) %>
+    </section>
+    <% }) %>
+  </div>
+
+  <aside class="col-side">
+    <% if (!user) { %>
+    <section class="block side join">
+      <strong>Aramıza katıl</strong>
+      <p>Konu aç, script paylaş, sorularına cevap al. Üyelik ücretsiz.</p>
+      <div class="join-btns"><a class="btn sm" href="/register">Kayıt ol</a><a class="btn sm ghost" href="/login">Giriş yap</a></div>
+    </section>
+    <% } %>
+
+    <section class="block side">
+      <h3><span><%- include('partials/icon', { name: 'users', size: 15 }) %> Çevrim içi üyeler</span> <span class="count"><%= online.length %></span></h3>
+      <div class="online">
+        <% online.forEach(function (u, i) { %><%- include('partials/uname', { nid: u.id, nname: u.username, ncolor: u.name_color }) %><%= i < online.length - 1 ? ', ' : '' %><% }) %>
+        <% if (!online.length) { %><span class="meta">Şu an çevrim içi üye yok.</span><% } %>
+      </div>
+      <p class="online-total">Toplam: <b><%= online.length + guests %></b> (Üye: <%= online.length %>, ziyaretçi: <%= guests %>)</p>
+    </section>
+
+    <section class="block side">
+      <h3><span><%- include('partials/icon', { name: 'chat', size: 15 }) %> Son mesajlar</span></h3>
+      <ul class="latest">
+        <% latestPosts.forEach(function (p) { %>
+        <li>
+          <%- include('partials/avatar', { au: p, sz: 32 }) %>
+          <div>
+            <a href="/post/<%= p.id %>" class="latest-title"><%- include('partials/prefix', { pl: p.prefix_label, pc: p.prefix_color }) %> <%= p.title %></a>
+            <span class="meta">En son: <%- include('partials/uname', { nid: p.uid, nname: p.username, ncolor: p.name_color }) %> · <%= timeAgo(p.created_at) %></span>
+            <span class="meta dim"><%= p.forum %></span>
+          </div>
+        </li>
+        <% }) %>
+        <% if (!latestPosts.length) { %><li class="meta">Henüz bir şey yok.</li><% } %>
+      </ul>
+    </section>
+
+    <section class="block side">
+      <h3><span><%- include('partials/icon', { name: 'grid', size: 15 }) %> Forum istatistikleri</span></h3>
+      <dl class="kv">
+        <div><dt>Konular</dt><dd><%= stats.threads.toLocaleString('tr-TR') %></dd></div>
+        <div><dt>Mesajlar</dt><dd><%= stats.posts.toLocaleString('tr-TR') %></dd></div>
+        <div><dt>Üyeler</dt><dd><%= stats.users.toLocaleString('tr-TR') %></dd></div>
+        <% if (newest) { %><div><dt>Son üye</dt><dd><%- include('partials/uname', { nid: newest.id, nname: newest.username, ncolor: newest.name_color }) %></dd></div><% } %>
+      </dl>
+    </section>
+  </aside>
+</div>
+
+<%- include('partials/foot') %>

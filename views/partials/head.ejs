@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= (notifCount + convCount) ? '(' + (notifCount + convCount) + ') ' : '' %><%= title ? title + ' · ' : '' %><%= site.name %></title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css?v=14">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="logo" href="/">
+      <span class="logo-mark" aria-hidden="true"></span>
+      <span class="logo-txt"><%= site.name %></span>
+    </a>
+    <nav class="mainnav">
+      <a href="/" class="<%= path === '/' || path.startsWith('/forum') || path.startsWith('/thread') ? 'on' : '' %>">Forumlar</a>
+      <a href="/members" class="<%= path.startsWith('/member') ? 'on' : '' %>">Üyeler</a>
+      <% if (isAdmin) { %><a href="/admin" class="<%= path.startsWith('/admin') ? 'on' : '' %>">Yönetim</a><% } %>
+    </nav>
+    <form class="topsearch" action="/search" method="get" role="search">
+      <%- include('icon', { name: 'search', size: 16 }) %>
+      <input name="q" placeholder="Konu veya mesaj ara" aria-label="Ara">
+      <kbd>/</kbd>
+    </form>
+    <div class="userbox">
+      <% if (user) { %>
+        <details class="menu bellmenu">
+          <summary class="bell<%= convCount ? ' has' : '' %>" aria-label="Özel mesajlar<%= convCount ? ' (' + convCount + ' okunmamış)' : '' %>">
+            <%- include('icon', { name: 'mail', size: 19 }) %>
+            <% if (convCount) { %><span class="bell-count"><%= convCount > 99 ? '99+' : convCount %></span><% } %>
+          </summary>
+          <div class="menu-pop notif-pop">
+            <div class="notif-pop-head">
+              <strong>Özel mesajlar</strong>
+              <a class="linkbtn" href="/conversations/new"><%- include('icon', { name: 'plus', size: 14 }) %> Yeni mesaj</a>
+            </div>
+            <div class="notif-pop-list">
+              <% convRecent.forEach(function (c) { %>
+              <a class="notif conv-mini<%= c.unread ? ' unread' : '' %>" href="/conversations/<%= c.id %>">
+                <span class="notif-av"><%- include('avatar', { au: { username: c.last_username || '?', avatar_url: c.last_avatar }, sz: 36 }) %></span>
+                <span class="notif-txt">
+                  <b class="clip"><%= c.title %></b>
+                  <span class="clip conv-snip"><%= c.last_uid === user.id ? 'Sen: ' : (c.last_username ? c.last_username + ': ' : '') %><%= (c.last_body || '').replace(/\[[^\]]+\]/g, '') %></span>
+                  <span class="meta"><%= timeAgo(c.last_message_at) %></span>
+                </span>
+                <% if (c.unread) { %><span class="notif-dot"></span><% } %>
+              </a>
+              <% }) %>
+              <% if (!convRecent.length) { %><p class="notif-empty">Henüz özel mesajın yok. Bir üyenin profilinden “Mesaj gönder”e basarak başlayabilirsin.</p><% } %>
+            </div>
+            <a class="notif-pop-all" href="/conversations">Tüm mesajlar</a>
+          </div>
+        </details>
+        <details class="menu bellmenu">
+          <summary class="bell<%= notifCount ? ' has' : '' %>" aria-label="Bildirimler<%= notifCount ? ' (' + notifCount + ' okunmamış)' : '' %>">
+            <%- include('icon', { name: 'bell', size: 19 }) %>
+            <% if (notifCount) { %><span class="bell-count"><%= notifCount > 99 ? '99+' : notifCount %></span><% } %>
+          </summary>
+          <div class="menu-pop notif-pop">
+            <div class="notif-pop-head">
+              <strong>Bildirimler</strong>
+              <% if (notifCount) { %>
+              <form method="post" action="/notifications/read-all"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linkbtn"><%- include('icon', { name: 'check', size: 14 }) %> Tümünü okundu say</button></form>
+              <% } %>
+            </div>
+            <div class="notif-pop-list">
+              <% notifRecent.forEach(function (n) { %><%- include('notif', { n: n }) %><% }) %>
+              <% if (!notifRecent.length) { %><p class="notif-empty">Henüz bildirimin yok. Konulara yazdıkça burada cevaplar, beğeniler ve etiketler görünecek.</p><% } %>
+            </div>
+            <a class="notif-pop-all" href="/notifications">Tüm bildirimler</a>
+          </div>
+        </details>
+        <details class="menu">
+          <summary>
+            <%- include('avatar', { au: user, sz: 30 }) %>
+            <span class="userbox-name"><%= user.username %></span>
+          </summary>
+          <div class="menu-pop">
+            <div class="menu-head">
+              <%- include('avatar', { au: user, sz: 40 }) %>
+              <div><strong><%= user.username %></strong><%- include('role', { r: user.role }) %></div>
+            </div>
+            <a href="/member/<%= user.id %>"><%- include('icon', { name: 'user', size: 16 }) %> Profilim</a>
+            <a href="/conversations"><%- include('icon', { name: 'mail', size: 16 }) %> Özel mesajlar<% if (convCount) { %><span class="pill"><%= convCount %></span><% } %></a>
+            <a href="/notifications"><%- include('icon', { name: 'bell', size: 16 }) %> Bildirimler<% if (notifCount) { %><span class="pill"><%= notifCount %></span><% } %></a>
+            <a href="/account"><%- include('icon', { name: 'settings', size: 16 }) %> Hesap ayarları</a>
+            <% if (isAdmin) { %><a href="/admin"><%- include('icon', { name: 'shield', size: 16 }) %> Yönetim paneli</a><% } %>
+            <form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrf %>"><button><%- include('icon', { name: 'logout', size: 16 }) %> Çıkış yap</button></form>
+          </div>
+        </details>
+      <% } else { %>
+        <a class="btn ghost" href="/login">Giriş</a>
+        <a class="btn" href="/register">Kayıt ol</a>
+      <% } %>
+    </div>
+  </div>
+</header>
+<% if (site.announcement && path === '/') { %>
+<div class="notice-strip"><div class="wrap"><span class="tag">DUYURU</span><%= site.announcement %></div></div>
+<% } %>
+<main class="wrap page">
+<% if (flash) { %><div class="flash flash-<%= flash.type %>"><%= flash.text %></div><% } %>

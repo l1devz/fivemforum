@@ -1,0 +1,20 @@
+<%- include('partials/head') %>
+
+<div class="pagehead">
+  <div><h1>Bildirimler</h1><p class="lead"><%= notifCount ? notifCount + ' okunmamış bildirimin var.' : 'Tüm bildirimlerini okudun.' %></p></div>
+  <% if (notifCount) { %>
+  <form method="post" action="/notifications/read-all">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <button class="btn ghost"><%- include('partials/icon', { name: 'check', size: 16 }) %> Tümünü okundu say</button>
+  </form>
+  <% } %>
+</div>
+
+<section class="block notif-page">
+  <% items.forEach(function (n) { %><%- include('partials/notif', { n: n }) %><% }) %>
+  <% if (!items.length) { %><p class="empty">Henüz bildirimin yok. Biri konuna cevap yazdığında, mesajını beğendiğinde, alıntıladığında ya da seni @etiketlediğinde burada görünecek.</p><% } %>
+</section>
+
+<%- include('partials/pager', { base: '/notifications' }) %>
+
+<%- include('partials/foot') %>

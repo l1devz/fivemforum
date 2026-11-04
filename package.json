@@ -1,0 +1,23 @@
+{
+  "name": "forumsitesi",
+  "version": "1.0.0",
+  "description": "Node.js ve SQLite ile yazılmış modern Türkçe forum yazılımı: konu önekleri, bildirimler, özel mesajlar ve yönetim paneli.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cookie-session": "^2.1.1",
+    "ejs": "^7.0.2",
+    "express": "^4.22.3",
+    "multer": "^2.5.0"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}
